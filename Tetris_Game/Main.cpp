@@ -148,9 +148,7 @@ int main(int argc, char* args[])
 		}
 		else
 		{
-			drawBoard();
-			//SDL_UpdateWindowSurface(gWindow);
-			//SDL_Delay(2000);
+
 			Square* square = new Square();
 			for (int i = 0; i < 100; i++) {
 				
@@ -177,8 +175,8 @@ int main(int argc, char* args[])
 				clearScreen();
 
 
-				//Wait 1 secondsw
-				SDL_Delay(200);
+				//Wait .1 secondsw
+				SDL_Delay(100);
 
 			}
 			
