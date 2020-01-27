@@ -135,8 +135,8 @@ void pieceCollided() { //Should check for row completion in this
 }
 
 void printBoard() { //Should check for row completion in this 
-	for (int i = 0; i < BOARD_HEIGHT; i++) {
-		for (int j = 0; j < BOARD_WIDTH; j++) {
+	for (int i = 0; i < BOARD_WIDTH; i++) {
+		for (int j = 0; j < BOARD_HEIGHT; j++) {
 			std::cout << board[i][j];
 		}
 		std::cout << endl;
