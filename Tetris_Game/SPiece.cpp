@@ -1,10 +1,10 @@
-#include "LPiece.h"
+#include "SPiece.h"
 
 
 
-LPiece::LPiece()
+SPiece::SPiece()
 {
-	squares[0] = Point(0, -1);
+	squares[0] = Point(-1, 0);
 	squares[1] = Point(0, 0);
 	squares[2] = Point(0, 1);
 	squares[3] = Point(1, 1);
@@ -14,7 +14,6 @@ LPiece::LPiece()
 }
 
 
-LPiece::~LPiece()
+SPiece::~SPiece()
 {
 }
-

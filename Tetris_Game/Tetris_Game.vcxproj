@@ -122,16 +122,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BackwardLPiece.cpp" />
+    <ClCompile Include="LinePiece.cpp" />
+    <ClCompile Include="LPiece.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Piece.cpp" />
     <ClCompile Include="Point.cpp" />
+    <ClCompile Include="SPiece.cpp" />
     <ClCompile Include="Square.cpp" />
+    <ClCompile Include="TPiece.cpp" />
+    <ClCompile Include="ZPiece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackwardLPiece.h" />
+    <ClInclude Include="LinePiece.h" />
+    <ClInclude Include="LPiece.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="Point.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SPiece.h" />
     <ClInclude Include="Square.h" />
+    <ClInclude Include="TPiece.h" />
+    <ClInclude Include="ZPiece.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Tetris_Game.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

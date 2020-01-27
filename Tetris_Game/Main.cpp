@@ -4,10 +4,19 @@ and may not be redistributed without written permission.*/
 //Using SDL and standard IO
 #include <SDL.h>
 #include <stdio.h>
-#include "Square.h"
-
 #include <iostream>
 #include <algorithm>
+#include <ctime>
+
+#include "Square.h"
+#include "LinePiece.h"
+#include "LPiece.h"
+#include "BackwardLPiece.h"
+#include "SPiece.h"
+#include "TPiece.h"
+#include "ZPiece.h"
+
+
 using namespace std;
 
 //Screen dimension constants
@@ -31,6 +40,10 @@ SDL_Window* gWindow = NULL;
 //The surface contained by the window
 SDL_Surface* gScreenSurface = NULL;
 
+Piece* piece;
+
+int score = 0;
+
 int board[BOARD_WIDTH][BOARD_HEIGHT] = { 0 };
 
 
@@ -47,6 +60,7 @@ bool init()
 	}
 	else
 	{
+		srand((int)time(0));
 		//Create window
 		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 		if (gWindow == NULL)
@@ -195,9 +209,48 @@ void shiftBoard() {
 			}
 		}
 		if (complete) {
+			score += 1;
+			cout << score << "\n";
 			shiftRows(j);
 		}
 	}
+}
+
+void newPiece() {
+	int r = (rand() % 7) + 1; 
+	switch (r) {
+	case 1:
+		piece = new Square();
+		break;
+	case 2:
+		piece = new LinePiece();
+		break;
+	case 3:
+		piece = new LPiece();
+		break;
+	case 4:
+		piece = new BackwardLPiece();
+		break;
+	case 5:
+		piece = new SPiece();
+		break;
+	case 6:
+		piece = new ZPiece();
+		break;
+	case 7:
+		piece = new TPiece();
+		break;
+	default:
+		piece = new LinePiece();
+		break;
+	}
+}
+
+bool checkIfLost() {
+	for (int i = 0; i < BOARD_WIDTH; i++) {
+		if (board[i][0] == 1) return true;
+	}
+	return false;
 }
 
 int main(int argc, char* args[])
@@ -217,16 +270,26 @@ int main(int argc, char* args[])
 		else
 		{
 
-			Square* square = new Square(); // Make global?
+			//LinePiece* square = new LinePiece(); // Make global?
+			newPiece();
 			bool finished = false;
 
 			//Event handler
 			SDL_Event e;
 
+			int counter = 0;
+
+			int gamespeed = 100;
+
 			while (!finished) {
+
+				
+
+				int movespeed = 4;
 
 				while (SDL_PollEvent(&e) != 0)
 				{
+					
 					//User requests quit
 					if (e.type == SDL_QUIT)
 					{
@@ -235,20 +298,18 @@ int main(int argc, char* args[])
 					else if (e.type == SDL_KEYDOWN) {
 						switch (e.key.keysym.sym)
 						{
-						/*case SDLK_UP:
-							gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_UP];
+						case SDLK_UP:
+							piece->rotateClockwise(board);
 							break;
-
 						case SDLK_DOWN:
-							gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
-							break;*/
-
+							movespeed = 1;
+							break;
 						case SDLK_LEFT:
-							square->moveHor(-1, board);
+							piece->playerMoveHor(-1, board);
 							break;
 
 						case SDLK_RIGHT:
-							square->moveHor(1, board);
+							piece->playerMoveHor(1, board);
 							break;
 
 						default:
@@ -257,8 +318,9 @@ int main(int argc, char* args[])
 						}
 					}
 				}
+				counter++;
 				
-				square->drawPiece(board);
+				piece->drawPiece(board);
 				//Apply the image
 				drawBoard();
 
@@ -266,24 +328,34 @@ int main(int argc, char* args[])
 				SDL_UpdateWindowSurface(gWindow);
 
 				//printBoard();
-				square->remove(board);
-				square->moveDown();
-				if (square->hasCollided(board)) {
-					
-					//std::cout << "collision";
-					square->collide(board);
-					delete square;
-					square = new Square();
-					shiftBoard();
-					
+				
+				piece->remove(board);
+				if (counter % movespeed == 0) {
+					piece->moveDown();
+					if (piece->hasCollided(board)) {
+
+						//std::cout << "collision";
+						piece->collide(board);
+						delete piece;
+						newPiece();
+						shiftBoard();
+
+						if (gamespeed > 10) {
+							gamespeed -= 2;
+						}
+					}
+					if (checkIfLost()) {
+						finished = true;
+					}
 				}
+				
 				
 
 				clearScreen();
 
 
 				//Wait .1 secondsw
-				SDL_Delay(100);
+				SDL_Delay(gamespeed);
 
 			}
 			
