@@ -22,6 +22,8 @@ using namespace std;
 //Screen dimension constants
 const int SCREEN_WIDTH = 375;
 const int SCREEN_HEIGHT = 625;
+
+//Board and square dimensions
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 24;
 const int SQUARE_SIZE = 25;
@@ -78,13 +80,6 @@ bool init()
 	return success;
 }
 
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-
-	return success;
-}
 
 void close()
 {
@@ -99,59 +94,53 @@ void close()
 	SDL_Quit();
 }
 
+//Draws a square of the chosen colour at the specified coordinates
 void drawSquare(int x, int y, int r, int g, int b) {
-	SDL_Rect rect = { x, y, SQUARE_SIZE, SQUARE_SIZE }; // x, y, w, h
+	SDL_Rect rect = { x, y, SQUARE_SIZE, SQUARE_SIZE };
 	SDL_FillRect(gScreenSurface, &rect, SDL_MapRGB(gScreenSurface->format, r, g, b));
-	//SDL_RenderDrawRect(gWindow, &rect);
 }
 
+//Fills the screen with black to clear it
 void clearScreen() {
 	SDL_Rect rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT }; // x, y, w, h
 	SDL_FillRect(gScreenSurface, &rect, SDL_MapRGB(gScreenSurface->format, 0, 0, 0));
 	//SDL_RenderDrawRect(gWindow, &rect);
 }
 
+//Renders the Tetris board based on the 2d array storing the details of it.
 void drawBoard() {
-	
 	for (int j = 0; j < BOARD_HEIGHT; j++) {
 		for (int i = 0; i < BOARD_WIDTH; i++) {
-			//std::cout << board[i][j];
 			switch (board[i][j])
 			{
-			case 0: //Empty square
+			case 0: 
 				drawSquare((SQUARE_SIZE + 1) * i, (SQUARE_SIZE + 1) * j, 50, 50, 50);
 				break;
-				//implement this as nothing then add a break
-			case 1: //Normal square
+			case 1:
 				drawSquare((SQUARE_SIZE + 1) * i, (SQUARE_SIZE + 1) * j, 255, 0, 0);
 				break;
-			case 2:  //A square from the piece currently being dropped
+			case 2:
 				drawSquare((SQUARE_SIZE + 1) * i, (SQUARE_SIZE + 1) * j, 0, 0, 255);
 				break;
 			default:
 				break;
 			}
 		}
-		//std::cout << endl;
 	}
 }
-void eachRow(void(*f)(int[])) {
-	//for (int j = 0; j < BOARD_HEIGHT; j++) {
-	//	f(board[j]);
-	//}
-	//std::transform(board[0], board[BOARD_HEIGHT - 1], board[0], f);
+
+//Unused functions for applying a function to each square, row or column
+
+/*void eachRow(void(*f)(int[])) {
 	for (int j = 0; j < BOARD_HEIGHT; j++) {
 		f(board[j]);
 	}
 }
-
 //void eachCol(int[] col, void(*f)(int, int)) {
 	//for (int i = 0; i < BOARD_WIDTH; i++) {
 	//	f(i, j);
 	//}
-
 //}
-
 void eachSquare(int(*f)(int)) {
 	//eachRow(bind2nd(eachCol, f));
 	for (int j = 0; j < BOARD_HEIGHT; j++) {
@@ -159,13 +148,9 @@ void eachSquare(int(*f)(int)) {
 			board[i][j] = f(board[i][j]);
 		}
 	}
-}
+}*/
 
-int doSomething(int val) {
-	if (val == 0) return 1;
-}
-
-void printBoard() { //Should check for row completion in this 
+void printBoard() {
 	
 	for (int j = 0; j < BOARD_HEIGHT; j++) {
 		for (int i = 0; i < BOARD_WIDTH; i++) {
@@ -177,29 +162,23 @@ void printBoard() { //Should check for row completion in this
 	std::cout << endl;
 }
 
-bool checkCompleteRow(int row[], int j) {
-	for (int i = 0; i < sizeof(row) / sizeof(row[0]); i++) {
-		if (board[i][j] == 0) {
-			return false;
-		}
-	}
-	std::cout << "row complete \n";
-	return true;
-}
-
+//Shifts the rows above the specified row down.
+//Used when the player clears a row.
 void shiftRows(int row) {
 	for (int j = row; j > 0; j--) {
-		//*board[j] = *board[j - 1];
 		for (int i = 0; i < BOARD_WIDTH; i++) {
 			board[i][j] = board[i][j - 1];
 		}
 	}
+	//Clears top row as it has been shifted down.
 	for (int i = 0; i < BOARD_WIDTH; i++) {
-		board[i][0] = 0; //Set top row to 0
+		board[i][0] = 0; 
 	}
 }
 
-void shiftBoard() {
+//Checks the board to shift any that have been filled.
+//Updates the score by 1 and prints it for each full row.
+void checkAndShiftBoard() {
 	for (int j = 0; j < BOARD_HEIGHT; j++) {
 		bool complete = true;
 		for (int i = 0; i < BOARD_WIDTH; i++) {
@@ -210,12 +189,13 @@ void shiftBoard() {
 		}
 		if (complete) {
 			score += 1;
-			cout << score << "\n";
+			cout << "Current score: " << score << "\n";
 			shiftRows(j);
 		}
 	}
 }
 
+//Randomly selects the next piece.
 void newPiece() {
 	int r = (rand() % 7) + 1; 
 	switch (r) {
@@ -246,12 +226,108 @@ void newPiece() {
 	}
 }
 
+//Checks if the stacked rows have reached high enough to lose the game.
 bool checkIfLost() {
 	for (int i = 0; i < BOARD_WIDTH; i++) {
 		if (board[i][0] == 1) return true;
 	}
 	return false;
 }
+
+//Handles user events.
+int handleEvents() {
+	SDL_Event e;
+	while (SDL_PollEvent(&e) != 0)
+	{
+		//User requests quit
+		if (e.type == SDL_QUIT)
+		{
+			return 1;
+		}
+		else if (e.type == SDL_KEYDOWN) {
+			switch (e.key.keysym.sym)
+			{
+			case SDLK_UP:
+				piece->rotateClockwise(board);
+				break;
+			case SDLK_DOWN:
+				return 2;
+				break;
+			case SDLK_LEFT:
+				piece->playerMoveHor(-1, board);
+				break;
+
+			case SDLK_RIGHT:
+				piece->playerMoveHor(1, board);
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
+//Moves the pieces, updates the display and responds to events until the game is complete.
+void gameLoop()
+{
+	newPiece();
+	bool finished = false;
+
+	//Counts the duration elapsed for game speed increases.
+	int counter = 0;
+
+	int gamespeed = 100;
+
+	while (!finished) {
+
+		int movespeed = 4;
+		counter++;
+
+		switch (handleEvents()) {
+		case 1:
+			finished = true;
+			break;
+		case 2:
+			movespeed = 1;
+		}
+		
+		//Puts the current piece onto the board array.
+		piece->drawPiece(board);
+
+		//Draws the board to the screen and updates the screen.
+		drawBoard();
+		SDL_UpdateWindowSurface(gWindow);
+
+		//Removes the piece from the board array so it isn't rendered next time.
+		piece->remove(board);
+
+		//Moves the piece down and handles collisions.
+		//Speeds up the gamespeed and generates a new random piece every time a piece touches the bottom.
+		//Ends the game if the player loses.
+		if (counter % movespeed == 0) {
+			piece->moveDown();
+			if (piece->hasCollided(board)) {
+				piece->collide(board);
+				delete piece;
+				newPiece();
+				checkAndShiftBoard();
+				if (gamespeed > 10) {
+					gamespeed -= 2;
+				}
+			}
+			if (checkIfLost()) {
+				finished = true;
+			}
+		}
+		//Clears the screen then delays for a set amount of time to make the game playable.
+		clearScreen();
+		SDL_Delay(gamespeed);
+
+	}
+}
+
 
 int main(int argc, char* args[])
 {
@@ -262,104 +338,7 @@ int main(int argc, char* args[])
 	}
 	else
 	{
-		//Load media
-		if (!loadMedia())
-		{
-			printf("Failed to load media!\n");
-		}
-		else
-		{
-
-			//LinePiece* square = new LinePiece(); // Make global?
-			newPiece();
-			bool finished = false;
-
-			//Event handler
-			SDL_Event e;
-
-			int counter = 0;
-
-			int gamespeed = 100;
-
-			while (!finished) {
-
-				
-
-				int movespeed = 4;
-
-				while (SDL_PollEvent(&e) != 0)
-				{
-					
-					//User requests quit
-					if (e.type == SDL_QUIT)
-					{
-						finished = true;
-					}
-					else if (e.type == SDL_KEYDOWN) {
-						switch (e.key.keysym.sym)
-						{
-						case SDLK_UP:
-							piece->rotateClockwise(board);
-							break;
-						case SDLK_DOWN:
-							movespeed = 1;
-							break;
-						case SDLK_LEFT:
-							piece->playerMoveHor(-1, board);
-							break;
-
-						case SDLK_RIGHT:
-							piece->playerMoveHor(1, board);
-							break;
-
-						default:
-							//gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
-							break;
-						}
-					}
-				}
-				counter++;
-				
-				piece->drawPiece(board);
-				//Apply the image
-				drawBoard();
-
-				//Update the surface
-				SDL_UpdateWindowSurface(gWindow);
-
-				//printBoard();
-				
-				piece->remove(board);
-				if (counter % movespeed == 0) {
-					piece->moveDown();
-					if (piece->hasCollided(board)) {
-
-						//std::cout << "collision";
-						piece->collide(board);
-						delete piece;
-						newPiece();
-						shiftBoard();
-
-						if (gamespeed > 10) {
-							gamespeed -= 2;
-						}
-					}
-					if (checkIfLost()) {
-						finished = true;
-					}
-				}
-				
-				
-
-				clearScreen();
-
-
-				//Wait .1 secondsw
-				SDL_Delay(gamespeed);
-
-			}
-			
-		}
+		gameLoop();
 	}
 
 	//Free resources and close SDL

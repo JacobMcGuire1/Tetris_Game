@@ -7,7 +7,8 @@ Piece::Piece()
 {
 }
 
-void Piece::drawPiece(int board[][24]) //Need to make this use the const
+//Adds the piece to the board array, ensuring that it doesn't try to render any squares that are out of bounds.
+void Piece::drawPiece(int board[][24])
 {
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
 		Point p = squares[i];
@@ -15,12 +16,13 @@ void Piece::drawPiece(int board[][24]) //Need to make this use the const
 			board[p.x + this->x][p.y + this->y] = 2;
 		}
 		else {
-			std::cout << "Attempted to draw square out of bounds";
+			//std::cout << "Attempted to draw square out of bounds";
 		}
 	}
 }
 
-void Piece::remove(int board[][24]) //Need to make this use the const
+//Removes the piece from the board so it can be rendered in its new position next term.
+void Piece::remove(int board[][24])
 {
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
 		Point p = squares[i];
@@ -35,6 +37,7 @@ void Piece::remove(int board[][24]) //Need to make this use the const
 	}
 }
 
+//Rotates the piece, moving it to prevent it going off the screen if necessary.
 void Piece::rotateClockwise(int board[][24])
 {
 	int lowest = 0;
@@ -67,6 +70,7 @@ int Piece::moveDown(int dist)
 	return y;
 }
 
+//Moves the piece for the player, unless it would cause a collision.
 int Piece::playerMoveHor(int dist, int board[][24])
 {
 	
@@ -80,6 +84,7 @@ int Piece::moveHor(int dist) {
 	return x;
 }
 
+//Checks if the bottom of the piece is touching a square or the bottom of the board.
 bool Piece::hasCollided(int board[][24])
 {
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
@@ -90,6 +95,7 @@ bool Piece::hasCollided(int board[][24])
 	return false;
 }
 
+//Checks if the piece has gone over the side of the screen and returns the movement needed to correct this.
 int Piece::hasTouchedSide(int board[][24])
 {
 	int correction = 0;
@@ -108,6 +114,7 @@ int Piece::hasTouchedSide(int board[][24])
 	return correction;
 }
 
+//Lands the piece at the site of its collision, allowing a new piece to be generated.
 void Piece::collide(int board[][24])
 {
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
