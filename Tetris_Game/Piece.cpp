@@ -7,7 +7,7 @@ Piece::Piece()
 {
 }
 
-void Piece::drawPiece(int x, int y, int board[][24]) //Need to make this use the const
+void Piece::drawPiece(int board[][24]) //Need to make this use the const
 {
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
 		Point p = squares[i];
@@ -17,9 +17,21 @@ void Piece::drawPiece(int x, int y, int board[][24]) //Need to make this use the
 		else {
 			std::cout << "Attempted to draw piece out of bounds";
 		}
-		
-		//SDL_Rect rect = { x + p.x, y + p.y, SQUARE_SIZE, SQUARE_SIZE }; // x, y, w, h
-		//SDL_FillRect(gScreenSurface, &rect, SDL_MapRGB(gScreenSurface->format, 0, 255, 0));
+	}
+}
+
+void Piece::remove(int board[][24]) //Need to make this use the const
+{
+	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
+		Point p = squares[i];
+		if (p.x + this->x < 10 && p.y + this->y < 24) {
+			//std::cout << board[p.x + this->x][p.y + this->y];
+			board[p.x + this->x][p.y + this->y] = 0;
+			
+		}
+		else {
+			std::cout << "Attempted to remove piece out of bounds";
+		}
 	}
 }
 
@@ -38,11 +50,22 @@ int Piece::moveDown(int dist)
 
 bool Piece::hasCollided(int board[][24])
 {
-	if (this->y + 1 == 24) return true;
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
-		if (board[this->x][this->y + 1] == 1) return true;
+		Point p = squares[i];
+		if (board[this->x + p.x][this->y + p.y + 1] == 1) return true;
+		if (this->y + 1 + p.y == 24) return true;
 	}
 	return false;
+}
+
+void Piece::collide(int board[][24])
+{
+	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
+		Point p = squares[i];
+		if (p.x + this->x < 10 && p.y + this->y < 24) {
+			board[p.x + this->x][p.y + this->y] = 1;
+		}
+	}
 }
 
 

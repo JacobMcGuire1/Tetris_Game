@@ -96,8 +96,10 @@ void clearScreen() {
 }
 
 void drawBoard() {
-	for (int i = 0; i < BOARD_WIDTH; i++) {
-		for (int j = 0; j < BOARD_HEIGHT; j++) {
+	
+	for (int j = 0; j < BOARD_HEIGHT; j++) {
+		for (int i = 0; i < BOARD_WIDTH; i++) {
+			//std::cout << board[i][j];
 			switch (board[i][j])
 			{
 			case 0: //Empty square
@@ -109,38 +111,25 @@ void drawBoard() {
 				break;
 			case 2:  //A square from the piece currently being dropped
 				drawSquare((SQUARE_SIZE + 1) * i, (SQUARE_SIZE + 1) * j, 0, 0, 255);
-				board[i][j] = 0; //May need to replace this.
 				break;
 			default:
 				break;
 			}
-			//drawSquare((SQUARE_SIZE + 1) * i, (SQUARE_SIZE + 1) * j);
 		}
-	}
-	//Square* squarepiece = new Square();
-	//squarepiece->drawPiece(0, 0);
-}
-
-void pieceCollided() { //Should check for row completion in this 
-	for (int i = 0; i < BOARD_WIDTH; i++) {
-		for (int j = 0; j < BOARD_HEIGHT; j++) {
-			std::cout << board[i][j];
-			if (board[i][j] == 2) {
-				board[i][j] = 1;
-				std::cout << "test";
-			}
-			
-		}
+		//std::cout << endl;
 	}
 }
 
 void printBoard() { //Should check for row completion in this 
-	for (int i = 0; i < BOARD_WIDTH; i++) {
-		for (int j = 0; j < BOARD_HEIGHT; j++) {
+	
+	for (int j = 0; j < BOARD_HEIGHT; j++) {
+		for (int i = 0; i < BOARD_WIDTH; i++) {
 			std::cout << board[i][j];
 		}
 		std::cout << endl;
 	}
+	std::cout << endl;
+	std::cout << endl;
 }
 
 int main(int argc, char* args[])
@@ -163,27 +152,32 @@ int main(int argc, char* args[])
 			//SDL_UpdateWindowSurface(gWindow);
 			//SDL_Delay(2000);
 			Square* square = new Square();
-			for (int i = 0; i < 48; i++) {
+			for (int i = 0; i < 100; i++) {
 				
-				square->drawPiece(square->x, square->y, board);
+				square->drawPiece(board);
 				//Apply the image
 				drawBoard();
 
 				//Update the surface
 				SDL_UpdateWindowSurface(gWindow);
 
+				printBoard();
+				square->remove(board);
 				square->moveDown();
 				if (square->hasCollided(board)) {
-					printBoard();
+					
 					std::cout << "collision";
+					square->collide(board);
+					delete square;
 					square = new Square();
-					pieceCollided();
+					
 				}
+				
 
 				clearScreen();
 
 
-				//Wait 1 seconds
+				//Wait 1 secondsw
 				SDL_Delay(200);
 
 			}
@@ -197,41 +191,3 @@ int main(int argc, char* args[])
 	return 0;
 }
 
-/*class Point
-{
-	public:
-		int x;
-		int y;
-		Point() {}
-		Point(int x, int y) {
-			this->x = x;
-			this->y = y;
-		}
-};
-
-class Piece //May need coords in data
-{
-	public:
-		Point squares[4];
-
-		void drawPiece(int x, int y)
-		{
-			for (int i = 0; i < sizeof(squares)/sizeof(squares[0]); i++) {
-				Point p = squares[i];
-				SDL_Rect rect = { x + p.x, y + p.y, SQUARE_SIZE, SQUARE_SIZE }; // x, y, w, h
-				SDL_FillRect(gScreenSurface, &rect, SDL_MapRGB(gScreenSurface->format, 0, 255, 0));
-			}
-		}
-
-};
-
-class Square : public Piece {
-	public:
-		Square()
-		{
-			squares[0] = Point(0, 0);
-			squares[1] = Point(0, 1);
-			squares[2] = Point(1, 0);
-			squares[3] = Point(1, 1);
-		}
-};*/
