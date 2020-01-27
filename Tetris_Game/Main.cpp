@@ -5,12 +5,14 @@ and may not be redistributed without written permission.*/
 #include <SDL.h>
 #include <stdio.h>
 #include "Square.h"
+
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 640;
+const int SCREEN_WIDTH = 375;
+const int SCREEN_HEIGHT = 625;
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 24;
 const int SQUARE_SIZE = 25;
@@ -119,6 +121,35 @@ void drawBoard() {
 		//std::cout << endl;
 	}
 }
+void eachRow(void(*f)(int[])) {
+	//for (int j = 0; j < BOARD_HEIGHT; j++) {
+	//	f(board[j]);
+	//}
+	//std::transform(board[0], board[BOARD_HEIGHT - 1], board[0], f);
+	for (int j = 0; j < BOARD_HEIGHT; j++) {
+		f(board[j]);
+	}
+}
+
+//void eachCol(int[] col, void(*f)(int, int)) {
+	//for (int i = 0; i < BOARD_WIDTH; i++) {
+	//	f(i, j);
+	//}
+
+//}
+
+void eachSquare(int(*f)(int)) {
+	//eachRow(bind2nd(eachCol, f));
+	for (int j = 0; j < BOARD_HEIGHT; j++) {
+		for (int i = 0; i < BOARD_WIDTH; i++) {
+			board[i][j] = f(board[i][j]);
+		}
+	}
+}
+
+int doSomething(int val) {
+	if (val == 0) return 1;
+}
 
 void printBoard() { //Should check for row completion in this 
 	
@@ -130,6 +161,43 @@ void printBoard() { //Should check for row completion in this
 	}
 	std::cout << endl;
 	std::cout << endl;
+}
+
+bool checkCompleteRow(int row[], int j) {
+	for (int i = 0; i < sizeof(row) / sizeof(row[0]); i++) {
+		if (board[i][j] == 0) {
+			return false;
+		}
+	}
+	std::cout << "row complete \n";
+	return true;
+}
+
+void shiftRows(int row) {
+	for (int j = row; j > 0; j--) {
+		//*board[j] = *board[j - 1];
+		for (int i = 0; i < BOARD_WIDTH; i++) {
+			board[i][j] = board[i][j - 1];
+		}
+	}
+	for (int i = 0; i < BOARD_WIDTH; i++) {
+		board[i][0] = 0; //Set top row to 0
+	}
+}
+
+void shiftBoard() {
+	for (int j = 0; j < BOARD_HEIGHT; j++) {
+		bool complete = true;
+		for (int i = 0; i < BOARD_WIDTH; i++) {
+			if (board[i][j] == 0) {
+				complete = false;
+				break;
+			}
+		}
+		if (complete) {
+			shiftRows(j);
+		}
+	}
 }
 
 int main(int argc, char* args[])
@@ -149,8 +217,46 @@ int main(int argc, char* args[])
 		else
 		{
 
-			Square* square = new Square();
-			for (int i = 0; i < 100; i++) {
+			Square* square = new Square(); // Make global?
+			bool finished = false;
+
+			//Event handler
+			SDL_Event e;
+
+			while (!finished) {
+
+				while (SDL_PollEvent(&e) != 0)
+				{
+					//User requests quit
+					if (e.type == SDL_QUIT)
+					{
+						finished = true;
+					}
+					else if (e.type == SDL_KEYDOWN) {
+						switch (e.key.keysym.sym)
+						{
+						/*case SDLK_UP:
+							gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_UP];
+							break;
+
+						case SDLK_DOWN:
+							gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
+							break;*/
+
+						case SDLK_LEFT:
+							square->moveHor(-1, board);
+							break;
+
+						case SDLK_RIGHT:
+							square->moveHor(1, board);
+							break;
+
+						default:
+							//gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
+							break;
+						}
+					}
+				}
 				
 				square->drawPiece(board);
 				//Apply the image
@@ -159,15 +265,16 @@ int main(int argc, char* args[])
 				//Update the surface
 				SDL_UpdateWindowSurface(gWindow);
 
-				printBoard();
+				//printBoard();
 				square->remove(board);
 				square->moveDown();
 				if (square->hasCollided(board)) {
 					
-					std::cout << "collision";
+					//std::cout << "collision";
 					square->collide(board);
 					delete square;
 					square = new Square();
+					shiftBoard();
 					
 				}
 				

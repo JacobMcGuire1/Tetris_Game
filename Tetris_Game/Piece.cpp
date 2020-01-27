@@ -48,12 +48,30 @@ int Piece::moveDown(int dist)
 	return y;
 }
 
+int Piece::moveHor(int dist, int board[][24])
+{
+	
+	x += dist;
+	if (hasCollided(board) || hasTouchedSide(board)) x -= dist;
+	return x;
+}
+
+
 bool Piece::hasCollided(int board[][24])
 {
 	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
 		Point p = squares[i];
 		if (board[this->x + p.x][this->y + p.y + 1] == 1) return true;
 		if (this->y + 1 + p.y == 24) return true;
+	}
+	return false;
+}
+
+bool Piece::hasTouchedSide(int board[][24])
+{
+	for (int i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
+		Point p = squares[i];
+		if (this->x + 1 + p.x == 11 || this->x + 1 + p.x == 0) return true;
 	}
 	return false;
 }
